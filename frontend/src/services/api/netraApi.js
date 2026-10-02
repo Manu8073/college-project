@@ -40,3 +40,12 @@ export async function postEvent(event) {
 export async function getEvents() {
   return apiClient.get('/api/events');
 }
+
+/**
+ * POST /api/assistant/ask
+ * @param {string} query 
+ * @returns {Promise<{ success: boolean, answer: string }>}
+ */
+export async function askAssistant(query) {
+  return apiClient.post('/api/assistant/ask', { query });
+}

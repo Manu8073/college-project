@@ -7,6 +7,19 @@
 
 import { config } from '../config/index.js';
 
+/**
+ * Custom API error class — throw this anywhere in route handlers to return
+ * a structured JSON error response with a specific HTTP status code.
+ */
+export class ApiError extends Error {
+  constructor(statusCode, code, message) {
+    super(message);
+    this.statusCode = statusCode;
+    this.code = code;
+    this.name = 'ApiError';
+  }
+}
+
 // eslint-disable-next-line no-unused-vars
 export function errorHandler(err, _req, res, _next) {
   const statusCode = err.statusCode ?? err.status ?? 500;

@@ -13,6 +13,7 @@ import { config } from './config/index.js';
 import healthRouter  from './routes/health.js';
 import systemRouter  from './routes/system.js';
 import eventsRouter  from './routes/events.js';
+import assistantRouter from './routes/assistant.js';
 
 // Middleware
 import { requestLogger } from './middleware/requestLogger.js';
@@ -42,6 +43,7 @@ if (!config.isProduction) {
 app.use('/api/health',  healthRouter);
 app.use('/api/system',  systemRouter);
 app.use('/api/events',  eventsRouter);
+app.use('/api/assistant', assistantRouter);
 
 // ── 404 — unknown routes ─────────────────────────────────────
 app.use(notFound);

@@ -2,8 +2,8 @@
  * NETRA — Shared Data Contract
  * ─────────────────────────────────────────────────────────────
  * All inter-module communication uses a single standard event shape.
- * Every module (detection, navigation, ocr, shell) must emit and
- * consume events that conform to this structure.
+ * Every module (detection, navigation, ocr, currency, shell) must emit
+ * and consume events that conform to this structure.
  *
  * EVENT SHAPE:
  * {
@@ -19,29 +19,31 @@
 import { v4 as uuidv4 } from 'uuid';
 
 // ─── Source constants ──────────────────────────────────────────
-/** @type {'detection'|'navigation'|'ocr'|'shell'} */
+/** @type {'detection'|'navigation'|'ocr'|'currency'|'shell'} */
 export const SOURCE = {
-  DETECTION:  'detection',
+  DETECTION: 'detection',
   NAVIGATION: 'navigation',
-  OCR:        'ocr',
-  SHELL:      'shell',
+  OCR: 'ocr',
+  CURRENCY: 'currency',
+  SHELL: 'shell',
 };
 
 // ─── Type constants ────────────────────────────────────────────
-/** @type {'obstacle'|'navigation'|'text'|'system'} */
+/** @type {'obstacle'|'navigation'|'text'|'currency'|'system'} */
 export const EVENT_TYPE = {
-  OBSTACLE:   'obstacle',
+  OBSTACLE: 'obstacle',
   NAVIGATION: 'navigation',
-  TEXT:       'text',
-  SYSTEM:     'system',
+  TEXT: 'text',
+  CURRENCY: 'currency',
+  SYSTEM: 'system',
 };
 
 // ─── Priority constants ────────────────────────────────────────
 /** @type {'low'|'medium'|'high'|'critical'} */
 export const PRIORITY = {
-  LOW:      'low',
-  MEDIUM:   'medium',
-  HIGH:     'high',
+  LOW: 'low',
+  MEDIUM: 'medium',
+  HIGH: 'high',
   CRITICAL: 'critical',
 };
 
@@ -58,7 +60,7 @@ export const PRIORITY = {
  */
 export function createEvent({ source, type, priority, payload }) {
   return {
-    id:        uuidv4(),
+    id: uuidv4(),
     source,
     type,
     priority,
@@ -71,8 +73,8 @@ export function createEvent({ source, type, priority, payload }) {
 /**
  * @typedef {object} NetraEvent
  * @property {string} id
- * @property {'detection'|'navigation'|'ocr'|'shell'} source
- * @property {'obstacle'|'navigation'|'text'|'system'} type
+ * @property {'detection'|'navigation'|'ocr'|'currency'|'shell'} source
+ * @property {'obstacle'|'navigation'|'text'|'currency'|'system'} type
  * @property {'low'|'medium'|'high'|'critical'} priority
  * @property {string} timestamp
  * @property {object} payload
@@ -83,14 +85,14 @@ export function createEvent({ source, type, priority, payload }) {
 /** @returns {NetraEvent} */
 export function exampleObstacleEvent() {
   return createEvent({
-    source:   SOURCE.DETECTION,
-    type:     EVENT_TYPE.OBSTACLE,
+    source: SOURCE.DETECTION,
+    type: EVENT_TYPE.OBSTACLE,
     priority: PRIORITY.HIGH,
     payload: {
-      label:      'person',
+      label: 'person',
       confidence: 0.92,
-      direction:  'left',
-      distance:   '2m',
+      direction: 'left',
+      distance: '2m',
     },
   });
 }
@@ -98,13 +100,13 @@ export function exampleObstacleEvent() {
 /** @returns {NetraEvent} */
 export function exampleNavigationEvent() {
   return createEvent({
-    source:   SOURCE.NAVIGATION,
-    type:     EVENT_TYPE.NAVIGATION,
+    source: SOURCE.NAVIGATION,
+    type: EVENT_TYPE.NAVIGATION,
     priority: PRIORITY.MEDIUM,
     payload: {
       instruction: 'Turn right in 50 meters',
-      distance:    '50m',
-      heading:     'NE',
+      distance: '50m',
+      heading: 'NE',
     },
   });
 }
@@ -112,13 +114,27 @@ export function exampleNavigationEvent() {
 /** @returns {NetraEvent} */
 export function exampleOcrEvent() {
   return createEvent({
-    source:   SOURCE.OCR,
-    type:     EVENT_TYPE.TEXT,
+    source: SOURCE.OCR,
+    type: EVENT_TYPE.TEXT,
     priority: PRIORITY.LOW,
     payload: {
-      text:       'Sample detected text',
+      text: 'Sample detected text',
       confidence: 0.88,
-      language:   'en',
+      language: 'en',
+    },
+  });
+}
+
+/** @returns {NetraEvent} */
+export function exampleCurrencyEvent() {
+  return createEvent({
+    source: SOURCE.CURRENCY,
+    type: EVENT_TYPE.CURRENCY,
+    priority: PRIORITY.LOW,
+    payload: {
+      currency: 'INR',
+      denomination: '500',
+      confidence: 0.93,
     },
   });
 }
@@ -126,8 +142,8 @@ export function exampleOcrEvent() {
 /** @returns {NetraEvent} */
 export function exampleSystemEvent(message = 'NETRA system initialized') {
   return createEvent({
-    source:   SOURCE.SHELL,
-    type:     EVENT_TYPE.SYSTEM,
+    source: SOURCE.SHELL,
+    type: EVENT_TYPE.SYSTEM,
     priority: PRIORITY.LOW,
     payload: { message },
   });
