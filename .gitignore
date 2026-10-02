@@ -9,6 +9,17 @@ dist/
 .env.local
 .env.*.local
 
+# Python virtual environments & bytecode caches
+.venv/
+*/.venv/
+object-detection-service/.venv/
+ocr-service/.venv/
+currency-service/.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
 # Editor artifacts
 .DS_Store
 *.log
