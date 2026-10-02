@@ -38,6 +38,11 @@ import {
     describeTextDetection,
 } from '../modules/detection/textDetectionService.js';
 import {
+    detectObjects,
+    describeObjectDetection,
+    getDetectionSignature,
+} from '../modules/detection/detectionService.js';
+import {
     detectCurrency,
     describeCurrencyDetection,
 } from '../modules/currency/currencyDetectionService.js';
@@ -116,15 +121,17 @@ export default function NetraPage() {
     const cameraActive = cameraStatus === 'active';
 
     // ── Active mode ───────────────────────────────────────────
-    const [activeMode, setActiveMode] = useState('text'); // 'text' | 'currency'
+    const [activeMode, setActiveMode] = useState('text'); // 'text' | 'currency' | 'detect'
 
     // ── Detection state ───────────────────────────────────────
     const [isDetecting, setIsDetecting] = useState(false);
     const [isDetectingLoading, setIsDetectingLoading] = useState(false);
     const [textResult, setTextResult] = useState(null);
     const [currencyResult, setCurrencyResult] = useState(null);
+    const [detectionResult, setDetectionResult] = useState(null);
     const lastTextRef = useRef('');
     const lastCurrencyLabelRef = useRef('');
+    const lastDetectionSummaryRef = useRef('');
 
     // ── Voice assistant ───────────────────────────────────────
     const [isListening, setIsListening] = useState(false);
@@ -154,6 +161,7 @@ export default function NetraPage() {
     const lastSpokenTextRef   = useRef(lastSpokenText);
     const textResultRef       = useRef(textResult);
     const currencyResultRef   = useRef(currencyResult);
+    const detectionResultRef  = useRef(detectionResult);
     const isDetectingRef      = useRef(isDetecting);
     const cameraActiveRef     = useRef(cameraActive);
     const startCameraRef      = useRef(startCamera);
@@ -165,6 +173,7 @@ export default function NetraPage() {
     useEffect(() => { lastSpokenTextRef.current = lastSpokenText;}, [lastSpokenText]);
     useEffect(() => { textResultRef.current     = textResult;    }, [textResult]);
     useEffect(() => { currencyResultRef.current = currencyResult;}, [currencyResult]);
+    useEffect(() => { detectionResultRef.current = detectionResult;}, [detectionResult]);
     useEffect(() => { isDetectingRef.current    = isDetecting;   }, [isDetecting]);
     useEffect(() => { cameraActiveRef.current   = cameraActive;  }, [cameraActive]);
     useEffect(() => { startCameraRef.current    = startCamera;   }, [startCamera]);
@@ -247,7 +256,7 @@ export default function NetraPage() {
                             },
                         }));
                     }
-                } else {
+                } else if (mode === 'currency') {
                     const detected = await detectCurrency(frame, { signal: controller.signal });
                     if (cancelled) return;
                     setIsDetectingLoading(false);
@@ -275,15 +284,66 @@ export default function NetraPage() {
                             }));
                         }
                     }
+                } else if (mode === 'detect') {
+                    const video = videoRef.current;
+                    let frameWidth = 1280;
+                    let frameHeight = 720;
+                    if (video && video.videoWidth && video.videoHeight) {
+                        const scale = Math.min(1, 1280 / video.videoWidth);
+                        frameWidth = Math.round(video.videoWidth * scale);
+                        frameHeight = Math.round(video.videoHeight * scale);
+                    }
+
+                    const detected = await detectObjects(frame, {
+                        signal: controller.signal,
+                        frameWidth,
+                        frameHeight,
+                    });
+                    if (cancelled) return;
+                    setIsDetectingLoading(false);
+
+                    if (detected.count > 0) {
+                        const signature = getDetectionSignature(detected);
+                        if (signature !== lastDetectionSummaryRef.current) {
+                            lastDetectionSummaryRef.current = signature;
+                            setDetectionResult(detected);
+                            const desc = describeObjectDetection(detected);
+                            announce(desc);
+                            safeSpeakRef.current(desc);
+
+                            logEvent(createEvent({
+                                source: SOURCE.DETECTION,
+                                type: EVENT_TYPE.OBSTACLE,
+                                priority: detected.detections.some(d => d.confidence > 0.85)
+                                    ? PRIORITY.HIGH : PRIORITY.MEDIUM,
+                                payload: {
+                                    count: detected.count,
+                                    objects: detected.detections.map(d => ({
+                                        label: d.label,
+                                        confidence: d.confidence,
+                                        direction: d.direction,
+                                        distance: d.distance,
+                                    })),
+                                },
+                            }));
+                        }
+                    }
                 }
 
                 timerId = setTimeout(scan, DETECTION_INTERVAL_MS);
             } catch (err) {
                 if (cancelled) return;
-                console.warn('[NETRA scan]', err);
+                console.error('[NETRA scan error]', err);
                 setIsDetectingLoading(false);
                 setIsDetecting(false);
-                announce('Detection stopped due to an error.');
+
+                let userMsg = 'Detection stopped due to an error.';
+                if (err?.name === 'TextDetectionError' && err.code === 'CAMERA_NOT_READY') {
+                    userMsg = 'Camera is not ready. Please start the camera and try again.';
+                } else if (err?.message) {
+                    userMsg = err.message;
+                }
+                announce(userMsg);
             }
         }
 
@@ -338,7 +398,8 @@ export default function NetraPage() {
             // Switch mode immediately
             setActiveMode(mode);
             activeModeRef.current = mode;
-            announce(`Mode: ${mode === 'text' ? 'Read Text' : 'Check Money'}.`);
+            const modeName = mode === 'text' ? 'Read Text' : mode === 'detect' ? 'Detect Objects' : 'Check Money';
+            announce(`Mode: ${modeName}.`);
 
             // Start camera if it's off
             if (!cameraActiveRef.current) {
@@ -359,10 +420,14 @@ export default function NetraPage() {
                 lastTextRef.current = '';
                 setTextResult(null);
                 textResultRef.current = null;
-            } else {
+            } else if (mode === 'currency') {
                 lastCurrencyLabelRef.current = '';
                 setCurrencyResult(null);
                 currencyResultRef.current = null;
+            } else if (mode === 'detect') {
+                lastDetectionSummaryRef.current = '';
+                setDetectionResult(null);
+                detectionResultRef.current = null;
             }
 
             if (!isDetectingRef.current) {
@@ -395,6 +460,19 @@ export default function NetraPage() {
                     safeSpeak(describeCurrencyDetection(currencyResultRef.current));
                 } else {
                     safeSpeak("I couldn't recognize a banknote. Hold it flat and in better light.");
+                }
+                break;
+            }
+            case INTENT.DETECT_OBJECTS: {
+                safeSpeak('Looking around. Hold the camera steady.');
+                const readyD = await ensureCameraAndDetect('detect');
+                if (!readyD) break;
+
+                const foundD = await waitForRef(() => Boolean(detectionResultRef.current?.count > 0));
+                if (foundD) {
+                    safeSpeak(describeObjectDetection(detectionResultRef.current));
+                } else {
+                    safeSpeak("I couldn't detect any objects. Try pointing the camera at your surroundings.");
                 }
                 break;
             }
@@ -525,13 +603,18 @@ export default function NetraPage() {
                 lastTextRef.current = '';
                 setTextResult(null);
                 textResultRef.current = null;
-            } else {
+            } else if (activeMode === 'currency') {
                 lastCurrencyLabelRef.current = '';
                 setCurrencyResult(null);
                 currencyResultRef.current = null;
+            } else if (activeMode === 'detect') {
+                lastDetectionSummaryRef.current = '';
+                setDetectionResult(null);
+                detectionResultRef.current = null;
             }
             setIsDetecting(true);
-            announce(`${activeMode === 'text' ? 'Text' : 'Currency'} detection started.`);
+            const modeLabel = activeMode === 'text' ? 'Text' : activeMode === 'currency' ? 'Currency' : 'Object';
+            announce(`${modeLabel} detection started.`);
         }
     }
 
@@ -544,7 +627,8 @@ export default function NetraPage() {
             setIsDetecting(false);
             setIsDetectingLoading(false);
         }
-        announce(`Mode: ${mode === 'text' ? 'Read Text' : 'Check Money'}.`);
+        const modeName = mode === 'text' ? 'Read Text' : mode === 'detect' ? 'Detect Objects' : 'Check Money';
+        announce(`Mode: ${modeName}.`);
     }
 
     // ── Repeat result ─────────────────────────────────────────
@@ -554,26 +638,41 @@ export default function NetraPage() {
             speakRef.current?.(describeTextDetection(textResult));
         } else if (activeMode === 'currency' && currencyResult?.found) {
             speakRef.current?.(describeCurrencyDetection(currencyResult));
+        } else if (activeMode === 'detect' && detectionResult?.count > 0) {
+            speakRef.current?.(describeObjectDetection(detectionResult));
         }
     }
 
     // ── Derived display values ────────────────────────────────
-    const activeResult = activeMode === 'text' ? textResult : (currencyResult?.found ? currencyResult : null);
+    const activeResult = activeMode === 'text'
+        ? textResult
+        : activeMode === 'currency'
+        ? (currencyResult?.found ? currencyResult : null)
+        : (detectionResult?.count > 0 ? detectionResult : null);
     const hasResult = activeMode === 'text'
         ? Boolean(textResult?.text)
-        : Boolean(currencyResult?.found);
+        : activeMode === 'currency'
+        ? Boolean(currencyResult?.found)
+        : Boolean(detectionResult?.count > 0);
 
     function renderResultMain() {
         if (activeMode === 'text') return textResult?.text ?? null;
-        if (currencyResult?.found) {
+        if (activeMode === 'currency' && currencyResult?.found) {
             const sym = currencyResult.currency === 'INR' ? '₹' : '';
             return `${sym}${currencyResult.denomination} ${currencyResult.currency}`;
+        }
+        if (activeMode === 'detect' && detectionResult?.count > 0) {
+            return detectionResult.detections
+                .map(d => `${d.label} (${d.direction}, ${d.distance})`)
+                .join(' · ');
         }
         return null;
     }
 
     const resultMain = renderResultMain();
-    const resultConf = activeResult?.confidence != null
+    const resultConf = activeMode === 'detect'
+        ? (detectionResult?.count != null ? `${detectionResult.count} object${detectionResult.count !== 1 ? 's' : ''} found` : null)
+        : activeResult?.confidence != null
         ? `Confidence: ${Math.round(activeResult.confidence * 100)}%`
         : null;
 
@@ -701,6 +800,17 @@ export default function NetraPage() {
                         <span className="netra-tab__label">Read Text</span>
                     </button>
                     <button
+                        id="netra-tab-detect"
+                        role="tab"
+                        className="netra-tab"
+                        aria-selected={activeMode === 'detect'}
+                        aria-controls="netra-main"
+                        onClick={() => handleTabSwitch('detect')}
+                    >
+                        <span className="netra-tab__icon" aria-hidden="true">🔍</span>
+                        <span className="netra-tab__label">Detect Objects</span>
+                    </button>
+                    <button
                         id="netra-tab-currency"
                         role="tab"
                         className="netra-tab"
@@ -794,7 +904,7 @@ export default function NetraPage() {
                     aria-labelledby="netra-result-eyebrow"
                 >
                     <p id="netra-result-eyebrow" className="netra-result-card__eyebrow">
-                        {activeMode === 'text' ? 'Detected Text' : 'Detected Currency'}
+                        {activeMode === 'text' ? 'Detected Text' : activeMode === 'currency' ? 'Detected Currency' : 'Detected Objects'}
                         {isDetecting && isDetectingLoading && ' — scanning…'}
                         {isDetecting && !isDetectingLoading && ' — running'}
                     </p>

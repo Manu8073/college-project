@@ -11,6 +11,7 @@
 export const INTENT = {
     READ_TEXT: 'read_text',
     CHECK_CURRENCY: 'check_currency',
+    DETECT_OBJECTS: 'detect_objects',
     REPEAT: 'repeat',
     STOP: 'stop',
     UNKNOWN: 'unknown',
@@ -18,20 +19,58 @@ export const INTENT = {
 
 const COMMANDS = [
     {
+        intent: INTENT.STOP,
+        patterns: [
+            'stop detecting',
+            'stop detection',
+            'stop reading',
+            'stop camera',
+            'stop',
+            'cancel',
+            'quiet',
+            'be quiet',
+            'shut up',
+        ],
+    },
+    {
         intent: INTENT.READ_TEXT,
-        patterns: ['read this', 'read the text', 'read text', "what's this say", 'what does this say', 'what is this'],
+        patterns: [
+            'detect text',
+            'read this',
+            'read the text',
+            'read text',
+            "what's this say",
+            'what does this say',
+            'what is this',
+        ],
     },
     {
         intent: INTENT.CHECK_CURRENCY,
-        patterns: ['what currency', 'what note', 'how much is this', 'what money', 'check currency', 'currency'],
+        patterns: [
+            'what currency',
+            'what note',
+            'how much is this',
+            'what money',
+            'check currency',
+            'check money',
+            'currency',
+        ],
+    },
+    {
+        intent: INTENT.DETECT_OBJECTS,
+        patterns: [
+            "what's around me",
+            'what is around me',
+            'detect objects',
+            'detect object',
+            'what do you see',
+            'look around',
+            'scan around',
+        ],
     },
     {
         intent: INTENT.REPEAT,
         patterns: ['repeat', 'say that again', 'say again', 'what did you say'],
-    },
-    {
-        intent: INTENT.STOP,
-        patterns: ['stop', 'cancel', 'quiet', 'be quiet', 'shut up'],
     },
 ];
 

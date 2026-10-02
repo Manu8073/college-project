@@ -11,6 +11,16 @@ dist-ssr/
 .env.*.local
 !.env.example
 
+# Python virtual environments & bytecode caches
+.venv/
+venv/
+*/.venv/
+object-detection-service/.venv/
+ocr-service/.venv/
+currency-service/.venv/
+__pycache__/
+*.py[cod]
+
 # Logs
 *.log
 npm-debug.log*
@@ -23,9 +33,3 @@ pnpm-debug.log*
 !.vscode/extensions.json
 .idea/
 .DS_Store
-
-# Python
-__pycache__/
-*.py[cod]
-.venv/
-venv/
