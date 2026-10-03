@@ -58,6 +58,7 @@ import {
 } from '../shared/types/events.js';
 import { MAX_LOG_EVENTS } from '../shared/constants/index.js';
 import { formatTimestamp } from '../shared/utils/index.js';
+import NavigationPanel from '../modules/navigation/NavigationPanel.jsx';
 
 // ── Constants ─────────────────────────────────────────────────
 const DETECTION_INTERVAL_MS = 3000;
@@ -165,6 +166,7 @@ export default function NetraPage() {
     const isDetectingRef      = useRef(isDetecting);
     const cameraActiveRef     = useRef(cameraActive);
     const startCameraRef      = useRef(startCamera);
+    const stopCameraRef       = useRef(stopCamera);
     const handleCommandRef    = useRef(null); // set below, before engine creation
 
     useEffect(() => { activeModeRef.current     = activeMode;    }, [activeMode]);
@@ -177,6 +179,7 @@ export default function NetraPage() {
     useEffect(() => { isDetectingRef.current    = isDetecting;   }, [isDetecting]);
     useEffect(() => { cameraActiveRef.current   = cameraActive;  }, [cameraActive]);
     useEffect(() => { startCameraRef.current    = startCamera;   }, [startCamera]);
+    useEffect(() => { stopCameraRef.current     = stopCamera;    }, [stopCamera]);
 
     // ── Log helper ────────────────────────────────────────────
     const logEvent = useCallback((event) => {
@@ -476,6 +479,16 @@ export default function NetraPage() {
                 }
                 break;
             }
+            case INTENT.START_NAVIGATION: {
+                safeSpeak('Opening Navigation Mode.');
+                setActiveMode('navigate');
+                activeModeRef.current = 'navigate';
+                if (cameraActiveRef.current) {
+                    stopCameraRef.current();
+                }
+                announce('Mode: Navigation.');
+                break;
+            }
             case INTENT.REPEAT: {
                 const last = lastSpokenTextRef.current;
                 if (last) safeSpeak(last);
@@ -627,7 +640,10 @@ export default function NetraPage() {
             setIsDetecting(false);
             setIsDetectingLoading(false);
         }
-        const modeName = mode === 'text' ? 'Read Text' : mode === 'detect' ? 'Detect Objects' : 'Check Money';
+        if (mode === 'navigate' && cameraActive) {
+            stopCamera();
+        }
+        const modeName = mode === 'text' ? 'Read Text' : mode === 'detect' ? 'Detect Objects' : mode === 'currency' ? 'Check Money' : 'Navigation';
         announce(`Mode: ${modeName}.`);
     }
 
@@ -821,11 +837,28 @@ export default function NetraPage() {
                         <span className="netra-tab__icon" aria-hidden="true">💵</span>
                         <span className="netra-tab__label">Check Money</span>
                     </button>
+                    <button
+                        id="netra-tab-navigate"
+                        role="tab"
+                        className="netra-tab"
+                        aria-selected={activeMode === 'navigate'}
+                        aria-controls="netra-main"
+                        onClick={() => handleTabSwitch('navigate')}
+                    >
+                        <span className="netra-tab__icon" aria-hidden="true">🧭</span>
+                        <span className="netra-tab__label">Navigate</span>
+                    </button>
                 </div>
 
-                {/* ════════════════════════════════════════════
-                    5. CAMERA PREVIEW — ONE <video> element
-                ══════════════════════════════════════════════ */}
+                {activeMode === 'navigate' ? (
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <NavigationPanel />
+                    </div>
+                ) : (
+                    <>
+                        {/* ════════════════════════════════════════════
+                            5. CAMERA PREVIEW — ONE <video> element
+                        ══════════════════════════════════════════════ */}
                 <section className="netra-camera-section" aria-labelledby="netra-camera-heading">
                     <h2 id="netra-camera-heading" className="netra-sr-announcer">
                         Camera and Detection
@@ -941,6 +974,8 @@ export default function NetraPage() {
                         </button>
                     </div>
                 </section>
+                    </>
+                )}
 
                 {/* ════════════════════════════════════════════
                     7. COLLAPSIBLE EVENT LOG (developer only)

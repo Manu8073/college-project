@@ -12,6 +12,7 @@ export const INTENT = {
     READ_TEXT: 'read_text',
     CHECK_CURRENCY: 'check_currency',
     DETECT_OBJECTS: 'detect_objects',
+    START_NAVIGATION: 'start_navigation',
     REPEAT: 'repeat',
     STOP: 'stop',
     UNKNOWN: 'unknown',
@@ -66,6 +67,17 @@ const COMMANDS = [
             'what do you see',
             'look around',
             'scan around',
+        ],
+    },
+    {
+        intent: INTENT.START_NAVIGATION,
+        patterns: [
+            'navigate',
+            'navigation',
+            'start navigation',
+            'open navigation',
+            'take me to',
+            'directions to',
         ],
     },
     {

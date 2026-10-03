@@ -10,6 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-google-maps/api": "^2.20.8",
+    "@tensorflow-models/coco-ssd": "^2.2.3",
+    "@tensorflow/tfjs": "^4.22.0",
+    "lucide-react": "^1.50.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "uuid": "^14.0.2"

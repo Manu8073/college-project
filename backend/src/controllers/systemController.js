@@ -12,9 +12,10 @@ import { sendSuccess } from '../utils/response.js';
 // Static status map — update when modules become functional
 const MODULE_STATUS = {
   backend:    'ready',
-  detection:  'placeholder',
+  detection:  'ready',
   navigation: 'placeholder',
-  ocr:        'placeholder',
+  ocr:        'ready',
+  currency:   'ready',
   shell:      'ready',
 };
 
