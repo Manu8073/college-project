@@ -1,5 +1,5 @@
 import express from 'express';
-import { GoogleGenAI, Type, Schema } from '@google/genai';
+import { GoogleGenAI, Type } from '@google/genai';
 import { config } from '../config/index.js';
 import { ApiError } from '../middleware/errorHandler.js';
 
