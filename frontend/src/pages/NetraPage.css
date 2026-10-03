@@ -1,0 +1,691 @@
+/* ─────────────────────────────────────────────────────────────
+   NETRA — Single-Page Redesign Stylesheet
+   Light theme · high contrast · accessible · emerald accent
+   All tokens are scoped under .netra-page so they don't conflict
+   with the legacy dark-theme stylesheet on index.css.
+   ───────────────────────────────────────────────────────────── */
+
+/* ── Google Fonts (Inter) ─────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ── Design tokens ────────────────────────────────────────── */
+.netra-page {
+  /* Palette */
+  --np-bg:           #FBFAF7;
+  --np-card:         #FFFFFF;
+  --np-text:         #14181F;
+  --np-text-muted:   #4B5563;   /* checked ≥4.5:1 on white */
+  --np-border:       #D1D5DB;
+  --np-accent:       #0A5C36;   /* deep emerald */
+  --np-accent-hover: #084a2b;
+  --np-accent-light: #E6F4EE;   /* tint for active-tab bg */
+  --np-error:        #B3261E;   /* red — errors/stop only */
+  --np-error-bg:     #FDECEA;
+  --np-status-green: #16A34A;
+  --np-status-red:   #B3261E;
+
+  /* Typography */
+  --np-font:  'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Sizing */
+  --np-radius-card:    20px;
+  --np-radius-pill:    999px;
+  --np-radius-sm:      8px;
+
+  /* Spacing */
+  --np-gap:   20px;
+  --np-gap-sm:12px;
+  --np-gap-lg:32px;
+
+  /* Shadows (subtle only) */
+  --np-shadow: 0 1px 3px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.05);
+
+  /* Transitions */
+  --np-trans: 160ms ease;
+}
+
+/* ── Reset for the page scope ─────────────────────────────── */
+.netra-page *,
+.netra-page *::before,
+.netra-page *::after {
+  box-sizing: border-box;
+}
+
+/* ── Root page shell ──────────────────────────────────────── */
+.netra-page {
+  min-height: 100dvh;
+  background: var(--np-bg);
+  font-family: var(--np-font);
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--np-text);
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ── Skip-to-content (first focusable element) ────────────── */
+.netra-skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 9999;
+  padding: 0.75rem 1.25rem;
+  background: var(--np-accent);
+  color: #fff;
+  font-family: var(--np-font);
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: var(--np-radius-sm);
+  text-decoration: none;
+  transition: top var(--np-trans);
+}
+.netra-skip-link:focus {
+  top: 1rem;
+}
+
+/* ── Focus ring — 3px accent, 2px offset, everywhere ─────── */
+.netra-page :focus-visible {
+  outline: 3px solid var(--np-accent);
+  outline-offset: 2px;
+  border-radius: var(--np-radius-sm);
+}
+
+/* ── Page column ──────────────────────────────────────────── */
+.netra-column {
+  width: 100%;
+  max-width: 640px;
+  padding: 0 0 48px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--np-gap);
+}
+@media (max-width: 680px) {
+  .netra-column {
+    padding: 0 24px 48px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   1. HEADER
+   ════════════════════════════════════════════════════════ */
+.netra-header {
+  width: 100%;
+  max-width: 640px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0;
+  /* sticky so it stays on top while scrolling */
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: var(--np-bg);
+  border-bottom: 1px solid var(--np-border);
+}
+@media (max-width: 680px) {
+  .netra-header { padding: 0 24px; }
+}
+
+.netra-header__name {
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--np-text);
+  line-height: 1;
+}
+
+.netra-header__status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--np-text-muted);
+}
+
+.netra-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: background var(--np-trans);
+}
+.netra-status-dot--green { background: var(--np-status-green); }
+.netra-status-dot--red   { background: var(--np-status-red); }
+.netra-status-dot--checking {
+  background: #D97706;
+  animation: np-dot-pulse 1s ease-in-out infinite;
+}
+
+@keyframes np-dot-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .netra-status-dot--checking { animation: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   2. MIC BUTTON (primary control)
+   ════════════════════════════════════════════════════════ */
+.netra-mic-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 24px 0 8px;
+}
+
+.netra-mic-btn {
+  width: 280px;
+  height: 280px;
+  border-radius: var(--np-radius-pill);
+  background: var(--np-accent);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-family: var(--np-font);
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  position: relative;
+  transition: background var(--np-trans), transform var(--np-trans),
+              box-shadow var(--np-trans);
+  box-shadow: var(--np-shadow);
+  /* tap target is the full circle — already ≥ 64px on all sides */
+}
+@media (max-width: 680px) {
+  .netra-mic-btn {
+    width: 220px;
+    height: 220px;
+    font-size: 1rem;
+  }
+}
+
+.netra-mic-btn:hover:not(:disabled) {
+  background: var(--np-accent-hover);
+}
+.netra-mic-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.netra-mic-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Pulsing ring while listening */
+.netra-mic-btn--listening::before {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: var(--np-radius-pill);
+  border: 3px solid var(--np-accent);
+  opacity: 0;
+  animation: np-ring 1.2s ease-out infinite;
+}
+.netra-mic-btn--listening::after {
+  content: '';
+  position: absolute;
+  inset: -24px;
+  border-radius: var(--np-radius-pill);
+  border: 2px solid var(--np-accent);
+  opacity: 0;
+  animation: np-ring 1.2s ease-out 0.4s infinite;
+}
+
+@keyframes np-ring {
+  0%   { opacity: 0.6; transform: scale(1); }
+  100% { opacity: 0;   transform: scale(1.1); }
+}
+
+/* Reduced-motion: just a solid ring instead of animation */
+@media (prefers-reduced-motion: reduce) {
+  .netra-mic-btn--listening::before,
+  .netra-mic-btn--listening::after {
+    animation: none;
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  .netra-mic-btn--listening {
+    outline: 4px solid var(--np-accent);
+    outline-offset: 6px;
+  }
+}
+
+.netra-mic-icon {
+  font-size: 2.5rem;
+  line-height: 1;
+  /* SVG mic icon rendered as an inline element */
+}
+@media (max-width: 680px) {
+  .netra-mic-icon { font-size: 2rem; }
+}
+
+.netra-mic-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+@media (max-width: 680px) {
+  .netra-mic-label { font-size: 0.95rem; }
+}
+
+/* Voice error text */
+.netra-mic-error {
+  color: var(--np-error);
+  font-size: 0.875rem;
+  text-align: center;
+  max-width: 320px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   3. WAKE-WORD PILL TOGGLE
+   ════════════════════════════════════════════════════════ */
+.netra-wakeword {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.netra-wakeword__label {
+  font-size: 0.9rem;
+  color: var(--np-text-muted);
+  font-weight: 500;
+}
+
+/* Custom pill toggle (switch) */
+.netra-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+.netra-toggle input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.netra-toggle__track {
+  width: 52px;
+  height: 28px;
+  border-radius: var(--np-radius-pill);
+  background: var(--np-border);
+  border: 1.5px solid var(--np-border);
+  transition: background var(--np-trans), border-color var(--np-trans);
+  position: relative;
+  flex-shrink: 0;
+}
+.netra-toggle__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  transition: transform var(--np-trans);
+}
+.netra-toggle input:checked ~ .netra-toggle__track {
+  background: var(--np-accent);
+  border-color: var(--np-accent);
+}
+.netra-toggle input:checked ~ .netra-toggle__track .netra-toggle__thumb {
+  transform: translateX(24px);
+}
+/* Focus ring on hidden input via the track */
+.netra-toggle input:focus-visible ~ .netra-toggle__track {
+  outline: 3px solid var(--np-accent);
+  outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   4. MODE TABS
+   ════════════════════════════════════════════════════════ */
+.netra-tabs {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.netra-tab {
+  flex: 1;
+  min-height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: var(--np-radius-pill);
+  border: 2px solid var(--np-border);
+  background: var(--np-card);
+  color: var(--np-text-muted);
+  font-family: var(--np-font);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--np-trans), color var(--np-trans),
+              border-color var(--np-trans);
+  padding: 12px 8px;
+}
+.netra-tab:hover:not([aria-selected="true"]) {
+  background: var(--np-accent-light);
+  border-color: var(--np-accent);
+  color: var(--np-accent);
+}
+.netra-tab[aria-selected="true"] {
+  background: var(--np-accent);
+  border-color: var(--np-accent);
+  color: #fff;
+}
+.netra-tab__icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+.netra-tab__label {
+  font-size: 0.9rem;
+}
+
+/* High-contrast override */
+@media (prefers-contrast: more) {
+  .netra-tab { border-width: 3px; }
+  .netra-tab[aria-selected="true"] { outline: 2px solid var(--np-text); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   5. CAMERA PREVIEW
+   ════════════════════════════════════════════════════════ */
+.netra-camera-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.netra-video-wrapper {
+  width: 100%;
+  aspect-ratio: 4/3;
+  border-radius: var(--np-radius-card);
+  background: #E9E8E5;
+  border: 1.5px solid var(--np-border);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.netra-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+  border-radius: var(--np-radius-card);
+}
+.netra-video--active {
+  display: block;
+}
+
+.netra-video-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--np-text-muted);
+  font-size: 0.9rem;
+}
+.netra-video-placeholder__icon {
+  font-size: 3rem;
+  opacity: 0.5;
+}
+
+/* Camera + detect control row */
+.netra-camera-controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.netra-camera-controls > * {
+  flex: 1;
+  min-width: 120px;
+}
+
+/* ── Shared button base ───────────────────────────────────── */
+.np-btn {
+  min-height: 64px;
+  padding: 12px 20px;
+  border-radius: var(--np-radius-pill);
+  border: 2px solid transparent;
+  font-family: var(--np-font);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background var(--np-trans), color var(--np-trans),
+              border-color var(--np-trans), transform var(--np-trans);
+  text-align: center;
+  white-space: nowrap;
+}
+.np-btn:active:not(:disabled) { transform: scale(0.97); }
+.np-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Accent filled */
+.np-btn--accent {
+  background: var(--np-accent);
+  color: #fff;
+  border-color: var(--np-accent);
+}
+.np-btn--accent:hover:not(:disabled) {
+  background: var(--np-accent-hover);
+  border-color: var(--np-accent-hover);
+}
+
+/* Outlined accent */
+.np-btn--outline-accent {
+  background: transparent;
+  color: var(--np-accent);
+  border-color: var(--np-accent);
+}
+.np-btn--outline-accent:hover:not(:disabled) {
+  background: var(--np-accent-light);
+}
+
+/* Error/Stop */
+.np-btn--error {
+  background: var(--np-error-bg);
+  color: var(--np-error);
+  border-color: var(--np-error);
+}
+.np-btn--error:hover:not(:disabled) {
+  background: #f5d0ce;
+}
+
+/* Neutral secondary */
+.np-btn--neutral {
+  background: var(--np-card);
+  color: var(--np-text);
+  border-color: var(--np-border);
+  box-shadow: var(--np-shadow);
+}
+.np-btn--neutral:hover:not(:disabled) {
+  border-color: var(--np-accent);
+  color: var(--np-accent);
+}
+
+/* Detecting state indicator on detect button */
+.np-btn--detecting {
+  background: var(--np-error-bg);
+  color: var(--np-error);
+  border-color: var(--np-error);
+}
+.np-btn--detecting:hover:not(:disabled) {
+  background: #f5d0ce;
+}
+
+/* Camera error text */
+.netra-camera-error {
+  color: var(--np-error);
+  font-size: 0.875rem;
+  role: alert;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   6. RESULT CARD
+   ════════════════════════════════════════════════════════ */
+.netra-result-card {
+  background: var(--np-card);
+  border: 1.5px solid var(--np-border);
+  border-radius: var(--np-radius-card);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--np-shadow);
+  /* always present — stable aria-live region */
+}
+
+.netra-result-card__eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--np-text-muted);
+}
+
+.netra-result-card__main {
+  font-size: 2rem; /* 32px min */
+  font-weight: 700;
+  color: var(--np-text);
+  line-height: 1.3;
+  white-space: pre-line;
+  word-break: break-word;
+}
+@media (max-width: 680px) {
+  .netra-result-card__main { font-size: 1.75rem; }
+}
+
+.netra-result-card__empty {
+  font-size: 1.1rem;
+  color: var(--np-text-muted);
+}
+
+.netra-result-card__confidence {
+  font-size: 0.85rem;
+  color: var(--np-text-muted);
+}
+
+.netra-result-card__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.netra-result-card__actions > * {
+  flex: 1;
+  min-width: 100px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   7. DETAILS / EVENT LOG (collapsible, developer-only)
+   ════════════════════════════════════════════════════════ */
+.netra-details {
+  margin-top: 8px;
+}
+
+.netra-details summary {
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--np-text-muted);
+  padding: 6px 0;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+}
+.netra-details summary::-webkit-details-marker { display: none; }
+.netra-details summary::before {
+  content: '▶';
+  font-size: 0.6rem;
+  transition: transform var(--np-trans);
+  display: inline-block;
+}
+.netra-details[open] summary::before {
+  transform: rotate(90deg);
+}
+.netra-details summary:focus-visible {
+  outline: 3px solid var(--np-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.netra-log-list {
+  margin-top: 8px;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 240px;
+  overflow-y: auto;
+  font-size: 0.72rem;
+  color: var(--np-text-muted);
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  background: #F3F2EF;
+  border: 1px solid var(--np-border);
+  border-radius: var(--np-radius-sm);
+  padding: 10px 12px;
+}
+.netra-log-empty {
+  color: var(--np-text-muted);
+  font-size: 0.8rem;
+  padding: 4px 0;
+}
+.netra-log-item {
+  line-height: 1.4;
+  border-bottom: 1px solid var(--np-border);
+  padding-bottom: 4px;
+}
+.netra-log-item:last-child { border-bottom: none; }
+
+/* ═══════════════════════════════════════════════════════════
+   STATUS ANNOUNCER (aria-live region for mode/status changes)
+   ════════════════════════════════════════════════════════ */
+.netra-sr-announcer {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HIGH CONTRAST MODE
+   ════════════════════════════════════════════════════════ */
+@media (prefers-contrast: more) {
+  .netra-page {
+    --np-border: #000;
+    --np-text-muted: #1a1a1a;
+  }
+  .netra-mic-btn { box-shadow: 0 0 0 3px #000; }
+  .netra-result-card { border-width: 2px; border-color: #000; }
+}
