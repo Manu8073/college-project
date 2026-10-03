@@ -687,3 +687,825 @@ button {
   color: var(--accent-cyan);
   border-color: rgba(56, 189, 248, 0.3);
 }
+
+/* ========================================================
+   MINIMAL ACCESSIBLE APP LAYOUT & LIVE VISUAL MAP
+   ======================================================== */
+
+.netra-minimal-app {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #080c15;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Live Google Map Container */
+.live-map-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.live-map-canvas {
+  width: 100%;
+  height: 100%;
+  background: #080c15;
+}
+
+/* Map Layer Switcher Button */
+.map-layer-btn {
+  position: absolute;
+  top: 130px;
+  right: 68px;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.95rem;
+  border-radius: var(--radius-full);
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-medium);
+  color: #ffffff;
+  font-size: 0.825rem;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.map-layer-btn:hover {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: var(--accent-cyan);
+  transform: translateY(-2px);
+}
+
+/* Recenter Button */
+.map-recenter-btn {
+  position: absolute;
+  bottom: 175px;
+  right: 20px;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.1rem;
+  border-radius: var(--radius-full);
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-medium);
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.map-recenter-btn:hover {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: var(--accent-cyan);
+  transform: translateY(-2px);
+}
+
+/* Compass Orientation Badge */
+.map-compass-badge {
+  position: absolute;
+  bottom: 175px;
+  left: 20px;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--radius-full);
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-medium);
+  color: #cbd5e1;
+  font-size: 0.825rem;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
+}
+
+/* Map Notice/Error Banner */
+.map-error-banner {
+  position: absolute;
+  top: 130px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  max-width: 90%;
+  width: 440px;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: rgba(23, 14, 20, 0.92);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(244, 63, 94, 0.4);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.15rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  color: #fff;
+}
+
+/* Companion HUD Floating Card */
+.companion-hud-card {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 620px;
+  z-index: 20;
+  border-radius: var(--radius-lg);
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--border-medium);
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  padding: 0.95rem 1.35rem;
+  transition: all 0.3s ease;
+}
+
+.companion-hud-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.companion-brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.companion-brand-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-cyan);
+}
+
+.companion-status-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.companion-status-tag .status-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #cbd5e1;
+}
+
+.gps-accuracy-chip {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.companion-turn-instruction {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.25rem 0;
+}
+
+.maneuver-icon-box {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: var(--accent-cyan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.25);
+}
+
+.instruction-content {
+  flex: 1;
+}
+
+.instruction-step-text {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.35;
+}
+
+.companion-idle-banner {
+  padding: 0.25rem 0;
+}
+
+.idle-heading {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.companion-dest-metrics {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 0.65rem;
+  gap: 0.75rem;
+}
+
+.dest-info-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #cbd5e1;
+  font-weight: 600;
+  font-size: 0.85rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 60%;
+}
+
+.metrics-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.metric-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  color: #e2e8f0;
+}
+
+/* ========================================================
+   PRIMARY SINGLE MICROPHONE BUTTON FOR BLIND USERS
+   ======================================================== */
+
+.primary-mic-wrapper {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  pointer-events: none;
+  width: 100%;
+  max-width: 440px;
+}
+
+.primary-mic-wrapper > * {
+  pointer-events: auto;
+}
+
+/* Ripple Rings behind the button */
+.mic-ripple-container {
+  position: absolute;
+  top: 48px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 96px;
+  height: 96px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.mic-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Ripple animation for Asking/Listening */
+.mic-btn-asking .ring-1 {
+  border: 2px solid rgba(244, 63, 94, 0.8);
+  animation: mic-ripple 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+.mic-btn-asking .ring-2 {
+  border: 2px solid rgba(244, 63, 94, 0.5);
+  animation: mic-ripple 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) infinite 0.6s;
+}
+.mic-btn-asking .ring-3 {
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  animation: mic-ripple 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) infinite 1.2s;
+}
+
+/* Ripple animation for Navigating */
+.mic-btn-navigating .ring-1 {
+  border: 2px solid rgba(16, 185, 129, 0.7);
+  animation: mic-ripple 2.4s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+.mic-btn-navigating .ring-2 {
+  border: 2px solid rgba(56, 189, 248, 0.5);
+  animation: mic-ripple 2.4s cubic-bezier(0.2, 0.8, 0.2, 1) infinite 1.2s;
+}
+
+/* Ripple animation for Idle */
+.mic-btn-idle .ring-1 {
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  animation: mic-ripple 3s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+
+@keyframes mic-ripple {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+/* The Primary Mic Button */
+.primary-mic-btn {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, filter 0.2s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  border: 3.5px solid rgba(255, 255, 255, 0.28);
+  position: relative;
+  z-index: 2;
+  outline: none;
+}
+
+.primary-mic-btn:focus-visible {
+  border-color: #ffffff;
+  box-shadow: 0 0 0 6px rgba(56, 189, 248, 0.5);
+}
+
+.primary-mic-btn:hover {
+  transform: scale(1.06);
+  filter: brightness(1.12);
+}
+
+.primary-mic-btn:active,
+.primary-mic-btn.is-pressing {
+  transform: scale(0.92);
+  filter: brightness(0.9);
+}
+
+/* Button Variants by State */
+.primary-mic-btn.mic-btn-idle {
+  background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+  box-shadow: 0 10px 32px rgba(2, 132, 199, 0.5), 0 0 24px rgba(56, 189, 248, 0.35);
+}
+
+.primary-mic-btn.mic-btn-asking {
+  background: linear-gradient(135deg, #db2777 0%, #f43f5e 100%);
+  box-shadow: 0 10px 36px rgba(244, 63, 94, 0.6), 0 0 30px rgba(244, 63, 94, 0.45);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.primary-mic-btn.mic-btn-navigating {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  box-shadow: 0 10px 36px rgba(16, 185, 129, 0.55), 0 0 28px rgba(52, 211, 153, 0.4);
+}
+
+.primary-mic-btn.mic-btn-routing {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  box-shadow: 0 10px 32px rgba(99, 102, 241, 0.5);
+}
+
+.mic-btn-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mic-pulse {
+  animation: icon-pulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes icon-pulse {
+  0% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1.08);
+  }
+}
+
+/* Status Pill */
+.mic-status-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.5rem 1.2rem;
+  border-radius: var(--radius-full);
+  background: rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(18px);
+  border: 1px solid var(--border-medium);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  user-select: none;
+}
+
+.status-indicator-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.mic-btn-idle .status-indicator-dot {
+  background: var(--accent-cyan);
+}
+
+.mic-btn-asking .status-indicator-dot {
+  background: #f43f5e;
+  box-shadow: 0 0 8px #f43f5e;
+  animation: dot-blink 0.8s ease infinite alternate;
+}
+
+.mic-btn-navigating .status-indicator-dot {
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+
+.mic-btn-routing .status-indicator-dot {
+  background: #8b5cf6;
+}
+
+@keyframes dot-blink {
+  0% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.status-text {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+}
+
+/* Shortcut Hint */
+.mic-shortcut-hint {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 500;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+  user-select: none;
+}
+
+/* Off-screen Background Vision */
+.offscreen-vision-container {
+  position: fixed;
+  top: -9999px;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.offscreen-video,
+.offscreen-canvas {
+  width: 640px;
+  height: 480px;
+}
+
+/* ========================================================
+   LEAFLET MAP CUSTOM STYLING (DARK THEME, PULSE, HEADING)
+   ======================================================== */
+
+.leaflet-user-marker-container {
+  background: transparent !important;
+  border: none !important;
+}
+
+.leaflet-user-marker-wrap {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.leaflet-user-pulse {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(56, 189, 248, 0.35);
+  animation: user-marker-pulse 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+
+.leaflet-user-dot {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #00e5ff;
+  border: 3px solid #ffffff;
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.9);
+  z-index: 2;
+}
+
+.leaflet-user-heading {
+  position: absolute;
+  top: -8px;
+  left: 6px;
+  width: 24px;
+  height: 24px;
+  transform-origin: 12px 26px;
+  pointer-events: none;
+  z-index: 3;
+  transition: transform 0.2s ease-out;
+}
+
+@keyframes user-marker-pulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+/* Destination Pin & Tooltip */
+.leaflet-dest-marker-container {
+  background: transparent !important;
+  border: none !important;
+}
+
+.leaflet-dest-pin {
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.6));
+  animation: dest-pin-bounce 0.8s ease-out 1;
+}
+
+@keyframes dest-pin-bounce {
+  0% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(4px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.leaflet-dest-tooltip {
+  background: rgba(15, 23, 42, 0.94) !important;
+  border: 1px solid var(--border-medium) !important;
+  color: #ffffff !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.825rem !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  padding: 5px 10px !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45) !important;
+}
+
+.leaflet-dest-tooltip::before {
+  border-top-color: rgba(15, 23, 42, 0.94) !important;
+}
+
+/* Leaflet Zoom Controls Customization */
+.leaflet-top.leaflet-right {
+  top: 130px;
+  right: 16px;
+}
+
+.leaflet-bar {
+  border: 1px solid var(--border-medium) !important;
+  border-radius: var(--radius-md) !important;
+  overflow: hidden;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45) !important;
+}
+
+.leaflet-bar a {
+  background-color: rgba(15, 23, 42, 0.88) !important;
+  backdrop-filter: blur(12px);
+  color: #cbd5e1 !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+  transition: all 0.15s ease;
+}
+
+.leaflet-bar a:hover {
+  background-color: rgba(30, 41, 59, 0.95) !important;
+  color: var(--accent-cyan) !important;
+}
+
+/* ========================================================
+   MINI CAMERA CORNER PIP DISPLAY (DEMO BLOCK)
+   ======================================================== */
+
+.mini-camera-card {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  width: 220px;
+  z-index: 25;
+  background: rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(20px);
+  border: 1.5px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.mini-camera-card:hover {
+  border-color: rgba(56, 189, 248, 0.4);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.65), 0 0 20px rgba(56, 189, 248, 0.15);
+}
+
+.mini-camera-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.45rem 0.75rem;
+  background: rgba(0, 0, 0, 0.35);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.mini-camera-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.03em;
+}
+
+.mini-camera-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.65rem;
+  font-family: var(--font-mono);
+  background: rgba(56, 189, 248, 0.15);
+  color: var(--accent-cyan);
+  padding: 0.1rem 0.4rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  animation: dot-blink 0.8s ease infinite alternate;
+}
+
+.mini-camera-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.mini-cam-btn {
+  padding: 0.25rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #cbd5e1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.mini-cam-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+.mini-camera-viewport {
+  position: relative;
+  width: 100%;
+  height: 145px;
+  background: #050811;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mini-camera-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mini-camera-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.mini-camera-video.is-hidden,
+.mini-camera-canvas.is-hidden {
+  display: none;
+}
+
+.mini-camera-idle {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  background: radial-gradient(circle at center, rgba(56, 189, 248, 0.04) 0%, transparent 70%);
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.mini-camera-idle:hover {
+  background: radial-gradient(circle at center, rgba(56, 189, 248, 0.08) 0%, transparent 70%);
+}
+
+.mini-camera-idle .idle-text {
+  font-weight: 700;
+  color: #cbd5e1;
+  font-size: 0.8rem;
+}
+
+.mini-camera-idle .idle-hint {
+  font-size: 0.7rem;
+  color: var(--accent-cyan);
+}
+
+.mini-camera-collapsed {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.95rem;
+  border-radius: var(--radius-full);
+  background: rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(18px);
+  border: 1px solid var(--border-medium);
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mini-camera-collapsed:hover {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: var(--accent-cyan);
+  transform: translateY(-2px);
+}
+
+
+

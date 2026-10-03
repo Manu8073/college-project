@@ -73,6 +73,25 @@ export class NavigationController {
   }
 
   /**
+   * Primary single microphone button handler.
+   * - In 'idle': starts voice destination request.
+   * - In 'navigating': interrupts ongoing speech immediately and listens for user command.
+   * - In 'asking' or 'confirming': interrupts speaker prompt so user can speak immediately.
+   */
+  async handleMicClick() {
+    if (this.state === 'idle') {
+      return this.open();
+    }
+    if (this.state === 'navigating') {
+      this.d.speaker.stop();
+      return this.listenForCommand();
+    }
+    if (this.state === 'asking' || this.state === 'confirming') {
+      this.d.speaker.stop();
+    }
+  }
+
+  /**
    * Entry point: called after "Hey Netra" + "Open navigation", click, or preselected query.
    */
   async open(preselectedQuery = null) {
@@ -557,6 +576,8 @@ export class NavigationController {
     const sid = this.session;
     const alive = () => sid === this.session;
 
+    // Interrupt any currently playing instruction immediately
+    this.d.speaker.stop();
     this.arbiter.setMuted(true);
 
     try {
@@ -588,7 +609,7 @@ export class NavigationController {
     const sp = (t) => this.d.speaker.speak(t);
 
     // Stop navigation
-    if (/\b(stop|cancel|end|exit)\b/i.test(cmd)) {
+    if (/\b(stop|cancel|end|exit|quit)\b/i.test(cmd)) {
       return this.stop();
     }
 
@@ -628,6 +649,14 @@ export class NavigationController {
           Math.round(m / 1.3 / 60)
         )} minutes.`
       );
+    }
+
+    // Change destination: "go to [place]", "take me to [place]", "navigate to [place]"
+    const destMatch = cmd.match(/\b(?:go to|navigate to|take me to|find)\s+(.+)/i);
+    if (destMatch && destMatch[1]) {
+      const target = destMatch[1].trim();
+      this.stop();
+      return this.open(target);
     }
 
     return sp('You can say repeat, where am I, how far, or stop.');
