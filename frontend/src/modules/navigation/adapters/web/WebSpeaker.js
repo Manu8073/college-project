@@ -1,4 +1,8 @@
 export class WebSpeaker {
+  constructor(onSpeakingChange = null) {
+    this.onSpeakingChange = onSpeakingChange;
+  }
+
   speak(text, opts = {}) {
     return new Promise((resolve) => {
       if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
@@ -11,8 +15,15 @@ export class WebSpeaker {
       const u = new SpeechSynthesisUtterance(text);
       u.rate = opts.rate ?? 1.0;
       u.pitch = opts.pitch ?? 1.0;
-      u.onend = () => resolve();
-      u.onerror = () => resolve(); // never block the pipeline on TTS errors
+      u.onstart = () => this.onSpeakingChange?.(true);
+      u.onend = () => {
+        this.onSpeakingChange?.(false);
+        resolve();
+      };
+      u.onerror = () => {
+        this.onSpeakingChange?.(false);
+        resolve();
+      }; // never block the pipeline on TTS errors
       speechSynthesis.speak(u);
     });
   }
@@ -20,6 +31,7 @@ export class WebSpeaker {
   stop() {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       speechSynthesis.cancel();
+      this.onSpeakingChange?.(false);
     }
   }
 }
